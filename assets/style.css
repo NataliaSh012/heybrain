@@ -1396,8 +1396,7 @@ body {
   animation: meditate 16s ease-in-out infinite alternate forwards;
 }
 
-
-/* NATALIA change starts here-->--> */
+/* NATALIA code starts here-->--> */
 .logo-switch {
   width: 100%;
   display: grid;
@@ -1462,4 +1461,4 @@ input:checked + .slider:before {
 .slider.round {
   border-radius: 34px;
 }
-/* -- NATALIA change ends here-->--
+/* -- NATALIA code ends here-->--
