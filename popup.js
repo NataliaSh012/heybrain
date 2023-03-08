@@ -11,10 +11,10 @@ function loadUser() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  ////  NATALIA code starts here --->
+
   const switchButton = document.querySelector('input[type="checkbox"]');
   checkSetting();
-  // //  NATALIA code ends here --->
+
 
   //TODO: Maybe a tiny loader, while fetching access_token?
   document.getElementById("sign-in").style.display = "none";
@@ -90,37 +90,35 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     req.onreadystatechange = function () {
       if (req.readyState == 4) {
-        if (req.status == 200) {
-          const response = JSON.parse(req.responseText);
-          chrome.storage.local.set({
-            access_token: response.response.user.api_key,
-            user: JSON.stringify(response.response.user),
-          });
-          // hide sign in form
-          document.getElementById("sign-in").style.display = "none";
-          // signed in form
-          document.getElementById("signed-in").style.display = "flex";
-          // load user
-          loadUser();
-//  NATALIA code starts here --->
-          checkSetting();
-          storeSetting();
-//  NATALIA code ends here --->
-          signInButton.innerHTML = "SIGN IN";
-          email.disabled = false;
-          password.disabled = false;
-          signInButton.disabled = false;
-        } else if (!alertShown) {
-          email.disabled = false;
-          password.disabled = false;
-          signInButton.disabled = false;
-          signInButton.innerHTML = "SIGN IN";
-
+       if (req.status == 200) {
+        const response = JSON.parse(req.responseText);
+        chrome.storage.local.set({
+          access_token: response.response.user.api_key,
+          user: JSON.stringify(response.response.user),
+        });
+        // hide sign in form
+        document.getElementById("sign-in").style.display = "none";
+        // signed in form
+        document.getElementById("signed-in").style.display = "flex";
+        // load user
+        loadUser();
+        checkSetting();
+        storeSetting();
+        signInButton.innerHTML = "SIGN IN";
+        email.disabled = false;
+        password.disabled = false;
+        signInButton.disabled = false;
+      } else if (!alertShown) {
+        email.disabled = false;
+        password.disabled = false;
+        signInButton.disabled = false;
+        signInButton.innerHTML = "SIGN IN";
+        
           alert("Wrong username or password, please try again");
-          alertShown = true; // Set the flag to indicate that the alert has been shown
-        }
+        alertShown = true; // Set the flag to indicate that the alert has been shown
       }
-    };
+    }
+  };
     // End of sign in, up & out actions.
   }); // End of sign in button event listener.
 
@@ -169,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, one number or special character."
       );
       return;
-    }
+}
 
     if (password.value !== passwordConfirm.value) {
       alert("Passwords do not match.");
@@ -250,10 +248,10 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.local.get(["access_token", "user"], (data) => {
       console.log("before sync hestory");
       syncHistoryButton.innerHTML = syncText;
-      syncHistoryButton.disabled = true;
+      syncHistoryButton.disabled = true; 
       chrome.runtime.sendMessage(
         {
-          action: "sync-history",
+        action: "sync-history",
           data: data,
         },
         (response) => {
@@ -264,10 +262,9 @@ document.addEventListener("DOMContentLoaded", function () {
           );
         }
       );
-    });
+        });
   }); // End of sync-history button event listener.
 
-  //NATALIA code starts here --->
   switchButton.addEventListener("click", function () {
     storeSetting();
     checkSetting();
@@ -286,5 +283,5 @@ document.addEventListener("DOMContentLoaded", function () {
       switchButton.checked = isEnabled;
     });
   }
-  //<-----NATALIA code ends here
+
 }); // End of DOMContentLoaded event listener.

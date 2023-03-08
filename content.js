@@ -5,7 +5,6 @@ const elBrainRootTabsID = "hey-brain-root-tabs";
 const elBrainContentID = "hey-brain-content";
 const elBrainLoaderID = "hey-brain-loader";
 const kBrainRootHeight = 475;
-
 const tabFirstItemID = "hey-brain-root-tab-item-first";
 const tabSecondItemID = "hey-brain-root-tab-item-second";
 const tabThirdItemID = "hey-brain-root-tab-item-third";
@@ -65,8 +64,11 @@ const pageInfo = () => {
 // init --start
 const init = () => {
   // brain drawer --start
+  if( document.getElementById("hey-brain-drawer") === null) {
+
   let elBrainDrawer = document.createElement("div");
   elBrainDrawer.id = elBrainDrawerID;
+  elBrainDrawer.classList.add('hey-brain-main')
   elBrainDrawer.style.position = "fixed";
   elBrainDrawer.style.bottom = kBrainRootHeight - 40 + "px";
   elBrainDrawer.style.right = "-36px";
@@ -115,13 +117,14 @@ const init = () => {
 
   document.body.appendChild(elBrainDrawer);
   // brain drawer --end
-
+  } 
   // const metadata = await fetchMetadata(sender.tab.url);
   // sendResponse(metadata);
 
   // brain root --start
   let elBrainRoot = document.createElement("div");
   elBrainRoot.id = elBrainRootID;
+  elBrainRoot.classList.add('hey-brain-main')
   elBrainRoot.style.position = "fixed";
   elBrainRoot.style.bottom = "0";
   elBrainRoot.style.right = "0";
@@ -1134,7 +1137,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       }
     });
   } else if (request.action === "deinit") {
+    if( document.getElementById("hey-brain-drawer") !== null) {
     document.body.removeChild(document.getElementById(elBrainDrawerID));
+    }
     document.body.removeChild(document.getElementById(elBrainRootID));
   }
 });
