@@ -11,10 +11,8 @@ function loadUser() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-
   const switchButton = document.querySelector('input[type="checkbox"]');
-  checkSetting();
-
+  checkSetting(); // required to check toggle's condition after refresh
 
   //TODO: Maybe a tiny loader, while fetching access_token?
   document.getElementById("sign-in").style.display = "none";
@@ -46,6 +44,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("sign-in").style.display = "flex";
     document.getElementById("sign-up").style.display = "none";
     document.getElementById("signed-in").style.display = "none";
+
+    //to turn off the app
+    chrome.tabs.query({ currentWindow: true }, function (tabs) {
+      tabs.forEach((tab) => {
+        chrome.tabs.sendMessage(tab.id, { message: "deinit" });
+      });
+    });
   });
 
   var showSignInButton = document.getElementById("show-sign-in-button");
@@ -60,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("sign-up").style.display = "flex";
   });
 
-  var signInButton = document.getElementById("sign-in-button");
+  var signInButton = document.getElementById("sign-in-button"); // sign in button
 
   signInButton.addEventListener("click", function () {
     const signingInText = "SIGNING YOU IN...";
@@ -90,35 +95,46 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     req.onreadystatechange = function () {
       if (req.readyState == 4) {
-       if (req.status == 200) {
-        const response = JSON.parse(req.responseText);
-        chrome.storage.local.set({
-          access_token: response.response.user.api_key,
-          user: JSON.stringify(response.response.user),
-        });
-        // hide sign in form
-        document.getElementById("sign-in").style.display = "none";
-        // signed in form
-        document.getElementById("signed-in").style.display = "flex";
-        // load user
-        loadUser();
-        checkSetting();
-        storeSetting();
-        signInButton.innerHTML = "SIGN IN";
-        email.disabled = false;
-        password.disabled = false;
-        signInButton.disabled = false;
-      } else if (!alertShown) {
-        email.disabled = false;
-        password.disabled = false;
-        signInButton.disabled = false;
-        signInButton.innerHTML = "SIGN IN";
-        
+        if (req.status == 200) {
+          const response = JSON.parse(req.responseText);
+          chrome.storage.local.set({
+            access_token: response.response.user.api_key,
+            user: JSON.stringify(response.response.user),
+          });
+          // hide sign in form
+          document.getElementById("sign-in").style.display = "none";
+          // signed in form
+          document.getElementById("signed-in").style.display = "flex";
+          // load user
+          loadUser();
+
+          signInButton.innerHTML = "SIGN IN";
+          email.disabled = false;
+          password.disabled = false;
+          signInButton.disabled = false;
+
+          switchButton.checked = true; // NATALIA code:after sign toggle is always on
+          storeSetting(); // NATALIA code:after sign toggle is always on
+          checkSetting(); // NATALIA code:after sign toggle is always on
+        } else if (!alertShown) {
+          email.disabled = false;
+          password.disabled = false;
+          signInButton.disabled = false;
+          signInButton.innerHTML = "SIGN IN";
+
           alert("Wrong username or password, please try again");
-        alertShown = true; // Set the flag to indicate that the alert has been shown
+          alertShown = true; // Set the flag to indicate that the alert has been shown
+        }
       }
-    }
-  };
+    };
+
+    //to turn on the app
+    chrome.tabs.query({ currentWindow: true }, function (tabs) {
+      tabs.forEach((tab) => {
+        chrome.tabs.sendMessage(tab.id, { message: "init" });
+      });
+    });
+
     // End of sign in, up & out actions.
   }); // End of sign in button event listener.
 
@@ -167,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, one number or special character."
       );
       return;
-}
+    }
 
     if (password.value !== passwordConfirm.value) {
       alert("Passwords do not match.");
@@ -237,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }); // End of sign up button event listener.
 
   var syncHistoryButton = document.getElementById("sync-history-button");
-  console.log(syncHistoryButton);
+
   syncHistoryButton.addEventListener("click", function () {
     console.log("clicked on sync");
     const nonSyncText = "SYNC HISTORY";
@@ -248,10 +264,10 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.local.get(["access_token", "user"], (data) => {
       console.log("before sync hestory");
       syncHistoryButton.innerHTML = syncText;
-      syncHistoryButton.disabled = true; 
+      syncHistoryButton.disabled = true;
       chrome.runtime.sendMessage(
         {
-        action: "sync-history",
+          action: "sync-history",
           data: data,
         },
         (response) => {
@@ -262,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
           );
         }
       );
-        });
+    });
   }); // End of sync-history button event listener.
 
   switchButton.addEventListener("click", function () {
@@ -272,7 +288,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function storeSetting() {
     const isEnabled = switchButton.checked; //true or false
-    console.log(`now the button is enabled? ${isEnabled}`);
     const setting = { enabled: isEnabled };
     chrome.storage.local.set(setting);
   }
@@ -283,5 +298,4 @@ document.addEventListener("DOMContentLoaded", function () {
       switchButton.checked = isEnabled;
     });
   }
-
 }); // End of DOMContentLoaded event listener.
