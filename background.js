@@ -18,29 +18,38 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 chrome.storage.onChanged.addListener((changes) => {
   if (changes?.enabled) {
-    let newValue = changes.enabled.newValue;
-    chrome.tabs.query({  "active": true, currentWindow: true }, function (tabs) {
- 
+    chrome.storage.local.get(["enabled"]).then((result) => {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(tabs[0].id, {
-          action: newValue ? "init" : "deinit",
+          action: result.enabled ? "init" : "deinit",
         });
-    
+      });
     });
   }
 });
 
+// chrome.storage.onChanged.addListener((changes) => {
+//   if (changes?.enabled) {
+//     let newValue = changes.enabled.newValue;
+//     chrome.tabs.query({  "active": true, currentWindow: true }, function (tabs) {
+
+//         chrome.tabs.sendMessage(tabs[0].id, {
+//           action: newValue ? "init" : "deinit",
+//         });
+
+//     });
+//   }
+// });
+
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.storage.local.get(["enabled"]).then((result) => {
-    
-    chrome.tabs.query({ "active": true, "currentWindow": true }, function (tabs) {
-      
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (result.enabled) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "init"})
+        chrome.tabs.sendMessage(tabs[0].id, { action: "init" });
       } else {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "deinit"})
+        chrome.tabs.sendMessage(tabs[0].id, { action: "deinit" });
       }
     });
-
   });
 });
 

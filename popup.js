@@ -46,6 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("signed-in").style.display = "none";
 
     //to turn off the app
+    switchButton.checked = false; // NATALIA code:after sign out toggle is always off
+    storeSetting(); // NATALIA code:after sign out toggle is always off
+    checkSetting(); // NATALIA code:after sign out toggle is always off
     chrome.tabs.query({ currentWindow: true }, function (tabs) {
       tabs.forEach((tab) => {
         chrome.tabs.sendMessage(tab.id, { message: "deinit" });
